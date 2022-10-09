@@ -310,8 +310,6 @@ bool uj_image_save_file(uj_image * image, const char * filename)
     return true;
 }
 
-
-
 /* ---- aplikacja korzystająca z biblioteki ---- */
 
 // #include <uj/image.h>

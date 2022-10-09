@@ -9,7 +9,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6d13032-cd15-4c9a-8aff-61e55ba937b3" name="Default Changelist" comment="" />
+    <list default="true" id="c6d13032-cd15-4c9a-8aff-61e55ba937b3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/ppm03_final.c" beforeDir="false" afterPath="$PROJECT_DIR$/ppm03_final.c" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,7 +20,11 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="2FouFfSIJMLHl85C3ZdSkzQWrL3" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -90,11 +96,22 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1665170656086</updated>
-      <workItem from="1665170657388" duration="18702000" />
+      <workItem from="1665170657388" duration="19305000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
