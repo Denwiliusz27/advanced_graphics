@@ -65,7 +65,7 @@ def divide_size_by_images_nr(image, nr_images):
         return factor1, factor2
 
 
-# zwraca wkość i szerokość małego obrazka w moizaice na podstawie ilości zdj per wiersz i kolumna
+# zwraca wysokość i szerokość małego obrazka w moizaice na podstawie ilości zdj per wiersz i kolumna
 def get_single_image_size(image, factor_w, factor_h):
     org_photo = cv2.imread(image)
 
@@ -77,6 +77,7 @@ def get_single_image_size(image, factor_w, factor_h):
     img_height = p_height // factor_h
 
     return img_width, img_height
+
 
 # dla każdego odczytanego zdjęcia z folderu zmienia jego rozmiar na podstawie podanych argumentów
 def resize_images(folder, img_w, img_h):
@@ -114,6 +115,7 @@ def create_mosaic(resized_images, factor_w, factor_h):
     cv2.imwrite("mosaic.png", mosaic)
     return mosaic
 
+
 # nakłada dwa zdjęcia na siebie
 def blend_images(org_image, mosaic):
     org_photo = cv2.imread(org_image)
@@ -124,7 +126,7 @@ def blend_images(org_image, mosaic):
     return blend
 
 
-# Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
     folder = "images" #"test_images/"
     main_img = 'volleyball.png'
@@ -141,6 +143,7 @@ if __name__ == '__main__':
     resized_images = resize_images(folder, img_w, img_h)
 
     mosaic = create_mosaic(resized_images, factor_w, factor_h)
+
     result = blend_images(main_img, mosaic)
 
     cv2.imwrite("wynik.png", result)
