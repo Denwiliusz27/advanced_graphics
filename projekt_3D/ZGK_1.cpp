@@ -17,6 +17,8 @@ USE_OSGPLUGIN(jpeg)
 USE_OSGPLUGIN(obj)
 USE_GRAPHICSWINDOW()
 
+using namespace std;
+
 class ModelController : public osgGA::GUIEventHandler
 {
 public:
@@ -27,7 +29,12 @@ public:
         osgGA::GUIActionAdapter& aa) override;
 protected:
     osg::ref_ptr<osg::MatrixTransform> _model;
+    osg::ref_ptr<osg::AnimationPathCallback> ap_leaf1;
+    osg::ref_ptr<osg::AnimationPathCallback> ap_tree1;
+    osg::ref_ptr<osg::AnimationPathCallback> ap_leaf2;
+    osg::ref_ptr<osg::AnimationPathCallback> ap_tree2;
 };
+
 
 bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
     osgGA::GUIActionAdapter& aa)
@@ -41,7 +48,7 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
             matrix *= osg::Matrix::translate(-2.0, 0.0, 0.0);
             break;
         case 'd': case 'D':
-            matrix *= osg::Matrix::translate(2.0, 0.0, 0.0); 
+            matrix *= osg::Matrix::translate(2.0, 0.0, 0.0);
             break;
         case 'w': case 'W':
             matrix *= osg::Matrix::translate(0.0, 2.0, 0.0);
@@ -54,6 +61,10 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
     default:
         break;
     }
+
+    osg::Vec3d position = matrix.getTrans();
+    cout << "pos: (" << position.x() << ", " << position.y() << ", " << position.z() << ")" << endl;
+
     return false;
 }
 
@@ -144,46 +155,6 @@ osg::Node* createTable()
 
     auto n = new osg::Geode();
     n->addDrawable(g);
-
-    //// białe krawędzie, rozpięte na punktach troszeczkę na zewnątrz sześcianu
-    //g = new osg::Geometry();
-    //v = new osg::Vec3Array();
-    //v->push_back(Vec3(0.0, 1.001, 1.001));
-    //v->push_back(Vec3(0.0, 0.0, 1.001));
-    //v->push_back(Vec3(1.001, 0.0, 1.001));
-    //v->push_back(Vec3(1.001, 1.001, 1.001));
-    //v->push_back(Vec3(0.0, 1.001, 0.0));
-    //v->push_back(Vec3(0.0, 0.0, 0.0));
-    //v->push_back(Vec3(1.001, 0.0, 0.0));
-    //v->push_back(Vec3(1.001, 1.001, 0.0));
-    //g->setVertexArray(v);
-    //c = new osg::Vec4Array();
-    //c->push_back(Vec4(0.0, 0.0, 1.0, 1.0));
-    //g->setColorArray(c);
-    //g->setColorBinding(osg::Geometry::BIND_OVERALL);
-    //e = new osg::DrawElementsUByte(osg::PrimitiveSet::LINE_STRIP);
-    //e->push_back(0);
-    //e->push_back(1);
-    //e->push_back(2);
-    //e->push_back(3);
-    //e->push_back(0);
-    //e->push_back(4);
-    //e->push_back(5);
-    //e->push_back(6);
-    //e->push_back(7);
-    //e->push_back(4);
-    //g->addPrimitiveSet(e);
-    //e = new osg::DrawElementsUByte(osg::PrimitiveSet::LINES);
-    //e->push_back(1);
-    //e->push_back(5);
-    //e->push_back(2);
-    //e->push_back(6);
-    //e->push_back(3);
-    //e->push_back(7);
-    //g->addPrimitiveSet(e);
-    //g->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    //n->addDrawable(g);
-
     return n;
 }
 
@@ -209,10 +180,11 @@ osg::Node* createLightSource(
     return sourceTrans.release();
 }
 
+
+
 osg::Node* stworz_scene(osgViewer::Viewer* viewer)
 {
     auto scn = new osg::Group();
-
     //osgGA::GUIEventHandler::handle();
     //viewer->getCamera->getV
 
@@ -222,28 +194,28 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
     {
         auto river = createTable();
         osg::MatrixTransform* t = new osg::MatrixTransform();
-        t->setMatrix(osg::Matrix::scale(20, 10.0, 0.2) *
-            osg::Matrix::translate(-10.0, 0.5, 0.0));
+        t->setMatrix(osg::Matrix::scale(24, 9.0, 0.2) *
+            osg::Matrix::translate(-12.0, 0.0, 0.0));
         t->addChild(river);
         scn->addChild(t);
     }
 
     {
         // ZABA
-        osg::Node* frog = osgDB::readNodeFile("assets/frogge.obj");
-        if (frog == nullptr) {
+        osg::Node* f = osgDB::readNodeFile("assets/frogge.obj");
+        if (f == nullptr) {
             std::fprintf(stderr, "Blad: nie udalo sie wczytac modelu 3D.\n");
             std::exit(EXIT_FAILURE);
         }
-        frog->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        f->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
-        auto* t2 = new osg::MatrixTransform();
-        t2->setMatrix(osg::Matrix::scale(0.2, 0.2, 0.2) *
+        auto* frog = new osg::MatrixTransform();
+        frog->setMatrix(osg::Matrix::scale(0.2, 0.2, 0.2) *
             osg::Matrix::rotate(osg::DegreesToRadians(-90.0), osg::Vec3(1, 0, 0)) *
             osg::Matrix::rotate(osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1)) *
             osg::Matrix::translate(0.0, 0.0, 0.4));
-        t2->addChild(frog);
-        scn->addChild(t2);
+        frog->addChild(f);
+        scn->addChild(frog);
 
         // LIŚĆ
         osg::Node* leaf = osgDB::readNodeFile("assets/lily.obj");
@@ -256,7 +228,7 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         auto* l = new osg::MatrixTransform();
         l->setMatrix(osg::Matrix::scale(0.01, 0.015, 0.01) * osg::Matrix::translate(0.0, 2.0, 1.0));
         l->addChild(leaf);
-        scn->addChild(l);
+        //scn->addChild(l);
 
         // PIEŃ
         osg::Node* tree = osgDB::readNodeFile("assets/Tronco_low.obj");
@@ -266,36 +238,96 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         }
         tree->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
-        //auto* t = new osg::MatrixTransform();
-        //t->setMatrix(osg::Matrix::scale(0.5, 0.5, 2.0) *
-        //    osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) * 
-        //    osg::Matrix::translate(5.8, 5.8, 1.7));
-        //t->addChild(tree);
+        auto* t = new osg::MatrixTransform();
+        t->setMatrix(osg::Matrix::scale(0.5, 0.5, 2.0) *
+            osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) *
+            osg::Matrix::translate(5.8, 5.8, 1.7));
+        t->addChild(tree);
         //scn->addChild(t);
 
 
-        osg::ref_ptr<ModelController> controller = new ModelController(t2);
-        viewer->addEventHandler(controller);
-
-
-
-
-
-        auto* t3 = new osg::MatrixTransform();
+        // liść 1
+        auto* l1 = new osg::MatrixTransform();
         osg::ref_ptr<osg::AnimationPath> path = new osg::AnimationPath;
         path->setLoopMode(osg::AnimationPath::LOOP);
-        path->insert(0, osg::AnimationPath::ControlPoint(osg::Vec3(-8.0, 0.0, 2.0)));
-        path->insert(2, osg::AnimationPath::ControlPoint(osg::Vec3(8.0, 0.0, 2.0)));
+        path->insert(0, osg::AnimationPath::ControlPoint(osg::Vec3(-10.0, 0.0, 0.0)));
+        path->insert(3, osg::AnimationPath::ControlPoint(osg::Vec3(10.0, 0.0, 0.0)));
+        path->insert(6, osg::AnimationPath::ControlPoint(osg::Vec3(-10.0, 0.0, 0.0)));
 
         osg::ref_ptr<osg::AnimationPathCallback> apcb = new osg::AnimationPathCallback;
         apcb->setAnimationPath(path);
-        t3->setUpdateCallback(apcb);
+        l1->setUpdateCallback(apcb);
 
-        t3->setMatrix(osg::Matrix::scale(0.5, 0.5, 2.0) *
-            osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) *
-            osg::Matrix::translate(5.8, 5.8, 1.7));
-        t3->addChild(tree);
-        scn->addChild(t3);
+        //t3->setMatrix(osg::Matrix::scale(0.5, 0.5, 2.0) *
+        //    osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) *
+        //    osg::Matrix::translate(0.0, 0.0, 0.0));
+        l1->addChild(l);
+        scn->addChild(l1);
+
+        // drzewo 1
+        auto* t1 = new osg::MatrixTransform();
+        osg::ref_ptr<osg::AnimationPath> path2 = new osg::AnimationPath;
+        path2->setLoopMode(osg::AnimationPath::LOOP);
+        path2->insert(0, osg::AnimationPath::ControlPoint(osg::Vec3(8.0, 0.0, 0.0)));
+        path2->insert(3, osg::AnimationPath::ControlPoint(osg::Vec3(-8.0, 0.0, 0.0)));
+        path2->insert(6, osg::AnimationPath::ControlPoint(osg::Vec3(8.0, 0.0, 0.0)));
+
+        osg::ref_ptr<osg::AnimationPathCallback> apcb2 = new osg::AnimationPathCallback;
+        apcb2->setAnimationPath(path2);
+        t1->setUpdateCallback(apcb2);
+        t1->addChild(t);
+        scn->addChild(t1);
+
+
+        // liść 2
+        auto* l2 = new osg::MatrixTransform();
+        osg::ref_ptr<osg::AnimationPath> path3 = new osg::AnimationPath;
+        path3->setLoopMode(osg::AnimationPath::LOOP);
+        path3->insert(0, osg::AnimationPath::ControlPoint(osg::Vec3(-4.0, 4.0, 0.0)));
+        path3->insert(3, osg::AnimationPath::ControlPoint(osg::Vec3(10.0, 4.0, 0.0)));
+        path3->insert(6.75, osg::AnimationPath::ControlPoint(osg::Vec3(-10.0, 4.0, 0.0)));
+        path3->insert(7.875, osg::AnimationPath::ControlPoint(osg::Vec3(-4.0, 4.0, 0.0)));
+
+        osg::ref_ptr<osg::AnimationPathCallback> apcb3 = new osg::AnimationPathCallback;
+        apcb3->setAnimationPath(path3);
+        l2->setUpdateCallback(apcb3);
+
+        //l2->setMatrix(osg::Matrix::translate(0.0, 8.0, 1.0));
+        l2->addChild(l);
+        scn->addChild(l2);
+
+
+        // drzewo 2
+        auto* t2 = new osg::MatrixTransform();
+        osg::ref_ptr<osg::AnimationPath> path4 = new osg::AnimationPath;
+        path4->setLoopMode(osg::AnimationPath::LOOP);
+        path4->insert(0, osg::AnimationPath::ControlPoint(osg::Vec3(10.0, 4.0, 0.0)));
+        path4->insert(2.5, osg::AnimationPath::ControlPoint(osg::Vec3(-8.0, 4.0, 0.0)));
+        path4->insert(5, osg::AnimationPath::ControlPoint(osg::Vec3(10.0, 4.0, 0.0)));
+
+        osg::ref_ptr<osg::AnimationPathCallback> apcb4 = new osg::AnimationPathCallback;
+        apcb4->setAnimationPath(path4);
+        t2->setUpdateCallback(apcb4);
+        t2->addChild(t);
+        scn->addChild(t2);
+
+
+        double time = 2.0;
+        osg::Matrix temp_matrix;
+        path4->getMatrix(time, temp_matrix);     //getMatrix(time);
+        osg::Vec3 temp_position = temp_matrix.getTrans();
+        std::cout << "Position at time " << time << ": (" << temp_position.x() << ", " << temp_position.y() << ", " << temp_position.z() << ")" << std::endl;
+
+
+
+        osg::Matrix matrix = frog->getMatrix();
+        osg::Vec3d position = matrix.getTrans();
+        cout << "pos: (" << position.x() << ", " << position.y() << ", " << position.z() << ")" << endl;
+
+
+        // kontroler
+        osg::ref_ptr<ModelController> controller = new ModelController(frog);
+        viewer->addEventHandler(controller);
 
 
 
@@ -305,7 +337,6 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         scn->getOrCreateStateSet()->setMode(GL_LIGHT0,
             osg::StateAttribute::ON);
         scn->addChild(light0);*/
-
     }
 
     return scn;
