@@ -14,6 +14,8 @@
 #include <osgGA/OrbitManipulator>
 #include "Time.hpp"
 #include "Input.hpp"
+#include <osgGA/TrackballManipulator>
+#include <osgText/Text>
 
 USE_OSGPLUGIN(jpeg)
 USE_OSGPLUGIN(obj)
@@ -24,6 +26,7 @@ using namespace std;
 bool win = false;
 bool canPlay = true;
 bool frogOnObj = false;
+osg::ref_ptr<osgText::Text> text = new osgText::Text;
 
 class RiverObject {
 public:
@@ -59,8 +62,6 @@ void RiverObject::setDirection(int dir) {
 
 
 
-
-
 class ModelController : public osgGA::GUIEventHandler
 {
 public:
@@ -89,26 +90,22 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
         if (Input::GetKeyDown('a')) {
             if (frog_pos.x() <= 10.0 && frog_pos.x() >= -8.0) {
                 frog_matrix *= osg::Matrix::translate(-2.0, 0.0, 0.0);
-                cout << "a" << endl;
             }
         }
         else if (Input::GetKeyDown('d')) {
             if (frog_pos.x() <= 8.0 && frog_pos.x() >= -10.0) {
                 frog_matrix *= osg::Matrix::translate(2.0, 0.0, 0.0);
-                cout << "d" << endl;
             }
         }
         else if (Input::GetKeyDown('w')) {
             if (frog_pos.y() < 12.0) {
-                cout << "FROGG: (" << frog_pos.y() << endl;
                 frog_matrix *= osg::Matrix::translate(0.0, 2.0, 0.0);
-                cout << "w" << endl;
             }
         }
 
         if (frog_pos.y() == 12.0) {
             win = true;
-            cout << "WYGRANA" << endl;
+            text->setText("WYGRANA");
             return false;
         } 
 
@@ -122,29 +119,11 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
             osg::Matrix obj_matrix = obj_matrixes[i]->getMatrix()->getMatrix();
             osg::Vec3d obj_pos = obj_matrix.getTrans();
 
-            cout << "obj: " << obj_pos.x() - obj_matrixes[i]->getSize() << endl;
-            cout << "frg: " << frog_pos.x() << endl;
-
-
             if ((frog_pos.y() == obj_pos.y()) && (frog_pos.x() >= obj_pos.x() - obj_matrixes[i]->getSize()) && (frog_pos.x() <= (obj_pos.x() + obj_matrixes[i]->getSize()))) {
-                //if (frog_pos.x() < -10.0 + obj_matrixes[i]->getSize() - deltaTime * obj_matrixes[i]->getDirection() * 5) {
-                //    frog_pos.x() = -10.0 + obj_matrixes[i]->getSize() - deltaTime * obj_matrixes[i]->getDirection() * 5;
-                //    cout << "FROGG: (" << frog_pos.x() << endl; //", " << frog_pos.y() << ", " << frog_pos.z() << ")" << endl;
-                //}
-                //else if (frog_pos.x() > 10.0 - obj_matrixes[i]->getSize() + deltaTime * obj_matrixes[i]->getDirection() * 5) {
-                //    //frog_pos.x() = 10.0;
-                //    frog_pos.x() = 10.0 - obj_matrixes[i]->getSize() + deltaTime * obj_matrixes[i]->getDirection() * 5;
-                //}
-                //else {
-                //    frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5; //obj_matrixes[i]->getDirection() * 0.1;
-                //}
 
-                if ((obj_pos.x() - obj_matrixes[i]->getSize() < -10.0) || (obj_pos.x() + obj_matrixes[i]->getSize() > 10.0)) {
-                }
                 frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5;
 
                 frogOnObj = true;
-                //cout << "zmieniam na obiekcie" << endl;
 
                 _model->setMatrix(
                     osg::Matrixd::scale(_model->getMatrix().getScale()) *
@@ -154,16 +133,55 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
                 );
                 break;
             }
-            
-            //frogOnObj = false;
 
+            //if ((frog_pos.y() == obj_pos.y()) && (frog_pos.x() >= obj_pos.x() - obj_matrixes[i]->getSize()) && (frog_pos.x() <= (obj_pos.x() + obj_matrixes[i]->getSize()))) {
+            //    //cout << "FROG: " << frog_pos.x() << endl;
+            //    //if (frog_pos.x() < -10.0 + deltaTime * obj_matrixes[i]->getDirection() * 5 ) {
+            //    //    frog_pos.x() = -10.0 + deltaTime * obj_matrixes[i]->getDirection() * 5;
+            //    //}
+            //    //else if (frog_pos.x() > 10.0 - deltaTime * obj_matrixes[i]->getDirection() * 5) {
+            //    //    frog_pos.x() = 10.0 - deltaTime * obj_matrixes[i]->getDirection() * 5;
+            //    //}
+            //    //else {
+            //    //    frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5; //obj_matrixes[i]->getDirection() * 0.1;
+            //    //}
+            //    if (frog_pos.x() - deltaTime * obj_matrixes[i]->getDirection() * 5 < -10.0) {
+            //        //frog_pos.x() = -10.0;
+            //    }
+            //    else if (frog_pos.x() + deltaTime * obj_matrixes[i]->getDirection() * 5 > 10.0){
+            //    }
+            //    else if (frog_pos.x() < -10.0) {
+            //        //frog_pos.x() = -10.0;
+            //    }
+            //    else if (frog_pos.x() > 10.0) {
+            //        frog_pos.x() = 10.0;
+            //    }
+            //    else {
+            //        frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5;
+            //    }
+
+            //    cout << "FROG: " << frog_pos.x() << endl;
+
+            //    frogOnObj = true;
+
+            //    _model->setMatrix(
+            //        osg::Matrixd::scale(_model->getMatrix().getScale()) *
+            //        osg::Matrixd::rotate(osg::DegreesToRadians(-90.0), osg::Vec3(1, 0, 0)) *
+            //        osg::Matrixd::rotate(osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1)) *
+            //        osg::Matrixd::translate(frog_pos)
+            //    );
+            //    break;
+            //}
+            
+            frogOnObj = false;
             //cout << "OBJ: (" << obj_pos.x() << ", " << obj_pos.y() << ", " << obj_pos.z() << ")" << endl;
         }
 
-        /*if (!frogOnObj && frog_pos.y() != 0.0 && frog_pos.y() != 10.0) {
-            cout << "PRZEGRANA" << endl;
+
+        if (!frogOnObj && frog_pos.y() != 0.0 && frog_pos.y() != 12.0) {
+            text->setText("PRZEGRANA");
             canPlay = false;
-        }*/
+        }
     }
     return false;
 }
@@ -174,16 +192,13 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
 class ObjController : public osgGA::GUIEventHandler
 {
 public:
-    ObjController(RiverObject* obj, string type)//osg::MatrixTransform* node, int k, string type)
+    ObjController(RiverObject* obj, string type)
         : _obj(obj), type(type) {}
-        //: _model(node), k(k), type(type) {}
 
     virtual bool handle(const osgGA::GUIEventAdapter& ea,
         osgGA::GUIActionAdapter& aa) override;
 protected:
     RiverObject* _obj;
-    //osg::ref_ptr<osg::MatrixTransform> _model;
-    //int k;
     string type;
 };
 
@@ -198,32 +213,17 @@ bool ObjController::handle(const osgGA::GUIEventAdapter& ea,
     osg::Vec3 position = matrix.getTrans();
 
     if (!win and canPlay){
-        position.x() += deltaTime * _obj->getDirection() * 5; //_obj->getDirection() * 0.1; 
 
-        //if (type == "leaf") {
-            if (position.x() <= -10.0 + _obj->getSize()) {
-                position.x() = -10.0 + _obj->getSize();
-                cout << "odbijam na x=" << position.x() << endl;
-                _obj->setDirection(1);
-            }
-            else if (position.x() >= 10.0 - _obj->getSize()) {
-                position.x() = 10.0-_obj->getSize();
-                cout << "odbijam na x=" << position.x() << endl;
-                _obj->setDirection(-1); //k = -1;
-            }
-        //}
-        //else {
-        //    if (position.x() < -9.0) {
-        //        position.x() = -9.0;
-        //        _obj->setDirection(1); //k = 1;
-        //    }
-        //    else if (position.x() > 9.0) {
-        //        position.x() = 9.0;
-        //        _obj->setDirection(-1); //k = -1;
-        //    }
-        //}
+        if (position.x() <= -10.0 + _obj->getSize()) {
+            _obj->setDirection(1);
 
-        //position.x() += deltaTime * _obj->getDirection() * 5; //_obj->getDirection() * 0.1; 
+        }
+        else if (position.x() >= 10.0 - _obj->getSize()) {
+            _obj->setDirection(-1); 
+        }
+
+        position.x() += deltaTime * _obj->getDirection() * 5;
+
 
         if (type == "leaf") {
             _obj->getMatrix()->setMatrix(
@@ -241,7 +241,6 @@ bool ObjController::handle(const osgGA::GUIEventAdapter& ea,
             );
         }
     }
-    //cout << "pos: (" << position.x() << ", " << position.y() << ", " << position.z() << ")" << endl;
    
     return false;
 }
@@ -340,29 +339,6 @@ osg::Node* createTable(string file_name)
 }
 
 
-osg::Node* createLightSource(
-    unsigned int num,
-    const osg::Vec3& trans,
-    const osg::Vec4& color)
-{
-    osg::ref_ptr<osg::Light> light = new osg::Light{};
-    light->setLightNum(num);
-    light->setDiffuse(color);
-    light->setSpecular(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-    light->setPosition(osg::Vec4(0.0f, 0.0f, 3.0f, 1.0f));
-    light->setDirection(osg::Vec3(0.0, 0.0, -1.0));
-    light->setSpotCutoff(45.0f);
-
-    osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource{};
-    lightSource->setLight(light);
-
-    osg::ref_ptr<osg::MatrixTransform> sourceTrans = new osg::MatrixTransform{};
-    sourceTrans->setMatrix(osg::Matrix::translate(trans));
-    sourceTrans->addChild(lightSource.get());
-    return sourceTrans.release();
-}
-
-
 
 osg::Node* stworz_scene(osgViewer::Viewer* viewer)
 {
@@ -370,6 +346,11 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
 
     viewer->getCamera()->getOrCreateStateSet()->setMode(GL_LIGHTING,
         osg::StateAttribute::ON);
+
+    text->setText("");
+    text->setPosition(osg::Vec3(-3.0, 2.0, 4.0));
+    text->setCharacterSize(1.0);
+    text->setColor(osg::Vec4(1.0, 0.0, 0.0, 1.0));
 
     {
         auto river = createTable("assets/river.jpg");
@@ -518,13 +499,13 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         r10->addChild(rock);
         scn->addChild(r10);
 
+        scn->addChild(text);
 
         RiverObject* leaf_obj = new RiverObject(l, 1, 0.8);
         RiverObject* leaf2_obj = new RiverObject(l2, -1, 0.8);
         RiverObject* plank_obj = new RiverObject(p, 1, 2.1);
         RiverObject* plank2_obj = new RiverObject(p2, -1, 2.1);
         RiverObject* leaf3_obj = new RiverObject(l3, 1, 0.8);
-
 
         osg::ref_ptr<ObjController> controller_l = new ObjController(leaf_obj, "leaf"); //new ObjController(l, 1, "leaf");
         viewer->addEventHandler(controller_l);
@@ -541,7 +522,6 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         osg::ref_ptr<ObjController> controller_l3 = new ObjController(leaf3_obj, "leaf");
         viewer->addEventHandler(controller_l3);
 
-
         vector<RiverObject*> obj_controllers;
         obj_controllers.push_back(leaf_obj);
         obj_controllers.push_back(plank2_obj);
@@ -549,19 +529,10 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         obj_controllers.push_back(plank_obj);
         obj_controllers.push_back(leaf3_obj);
         
-
-
-        //// kontroler
+        // główny kontroler
         osg::ref_ptr<ModelController> controller = new ModelController(frog, obj_controllers);
         viewer->addEventHandler(controller);
 
-
- /*       osg::Node* light0 = createLightSource(
-            0, osg::Vec3(0.0f, -4.0f, 3.0f), osg::Vec4(
-                1.0f, 0.0f, 0.0f, 1.0f));
-        scn->getOrCreateStateSet()->setMode(GL_LIGHT0,
-            osg::StateAttribute::ON);
-        scn->addChild(light0);*/
     }
 
     return scn;
@@ -571,8 +542,6 @@ int main()
 { 
     osgViewer::Viewer viewer;
 
-    //camera->setViewMatrixAsLookAt(osg::Vec3d(10, 10, 10), osg::Vec3d(0, 10, 0), osg::Vec3d(0, 0, 1));
- 
     osg::ref_ptr<TimeManager> tm = new TimeManager(&viewer);
     viewer.addEventHandler(tm);
 
@@ -580,16 +549,26 @@ int main()
     viewer.addEventHandler(im);
 
     auto scn = stworz_scene(&viewer);
-    
+   
     viewer.setUpViewInWindow(100, 100, 800, 600);
     viewer.setSceneData(scn);
-    auto om = new osgGA::OrbitManipulator();
-    viewer.setCameraManipulator(om);
+    
+    auto temp = new osgGA::TrackballManipulator;
+    osg::Vec3 eye(0.0, -20.0, 32.0); // The position of your
+    osg::Vec3 center(0.0, 5.5, 0.0); // The point your camera is looking
+    osg::Vec3 up(0.0, 1.0, 0.0);
+    temp->setHomePosition(eye, center, up);
+    viewer.setCameraManipulator(temp);      
 
-    viewer.getCamera()->setViewMatrixAsLookAt(osg::Vec3d(10, 10, 10), osg::Vec3d(0, 10, 0), osg::Vec3d(0, 0, 1));
-
+    osg::Matrix myviewMatrix;
+    myviewMatrix.makeLookAt(
+        eye,
+        center,
+        up);
+    viewer.getCamera()->setViewMatrix(myviewMatrix);
 
     viewer.realize();
+    
     while (!viewer.done()) {
         Input::ClearKeys();
         viewer.frame();
