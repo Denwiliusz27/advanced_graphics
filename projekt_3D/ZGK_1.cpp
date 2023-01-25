@@ -22,7 +22,8 @@ USE_GRAPHICSWINDOW()
 using namespace std;
 
 bool win = false;
-
+bool canPlay = true;
+bool frogOnObj = false;
 
 class RiverObject {
 public:
@@ -84,7 +85,7 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
     osg::Vec3 frog_pos = frog_matrix.getTrans();
     
 
-    if (!win) {
+    if (!win && canPlay) {
         if (Input::GetKeyDown('a')) {
             if (frog_pos.x() <= 10.0 && frog_pos.x() >= -8.0) {
                 frog_matrix *= osg::Matrix::translate(-2.0, 0.0, 0.0);
@@ -98,52 +99,72 @@ bool ModelController::handle(const osgGA::GUIEventAdapter& ea,
             }
         }
         else if (Input::GetKeyDown('w')) {
-            if (frog_pos.y() < 10.0) {
+            if (frog_pos.y() < 12.0) {
                 cout << "FROGG: (" << frog_pos.y() << endl;
                 frog_matrix *= osg::Matrix::translate(0.0, 2.0, 0.0);
                 cout << "w" << endl;
             }
-            else {
-                win = true;
-            }
         }
-    }
-    
-    _model->setMatrix(frog_matrix);
-    frog_pos = frog_matrix.getTrans();
 
-  
-    //cout << "FROGG: (" << frog_pos.x() << ", " << frog_pos.y() << ", " << frog_pos.z() << ")" << endl;
-    double deltaTime = Time::GetDeltaTime();
-
-    for (int i = 0; i < obj_matrixes.size(); i++) {
-        osg::Matrix obj_matrix = obj_matrixes[i]->getMatrix()->getMatrix();
-        osg::Vec3d obj_pos = obj_matrix.getTrans();
-
-        if ((frog_pos.y() == obj_pos.y()) && (frog_pos.x() >= obj_pos.x()-obj_matrixes[i]->getSize()) && (frog_pos.x() <= (obj_pos.x()+ obj_matrixes[i]->getSize()))) {
-            if (frog_pos.x() < -10.0) {
-                frog_pos.x() = -10.0;
-            }
-            else if (frog_pos.x() > 10.0) {
-                frog_pos.x() = 10.0;
-            }
-            else {
-                frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5; //obj_matrixes[i]->getDirection() * 0.1;
-            }
-
-            //cout << "zmieniam na obiekcie" << endl;
-            
-            _model->setMatrix(
-                osg::Matrixd::scale(_model->getMatrix().getScale()) *
-                osg::Matrixd::rotate(osg::DegreesToRadians(-90.0), osg::Vec3(1, 0, 0)) *
-                osg::Matrixd::rotate(osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1)) *
-                osg::Matrixd::translate(frog_pos)
-            );
+        if (frog_pos.y() == 12.0) {
+            win = true;
+            cout << "WYGRANA" << endl;
+            return false;
         } 
 
-        //cout << "OBJ: (" << obj_pos.x() << ", " << obj_pos.y() << ", " << obj_pos.z() << ")" << endl;
-    }
+        _model->setMatrix(frog_matrix);
+        frog_pos = frog_matrix.getTrans();
 
+
+        double deltaTime = Time::GetDeltaTime();
+
+        for (int i = 0; i < obj_matrixes.size(); i++) {
+            osg::Matrix obj_matrix = obj_matrixes[i]->getMatrix()->getMatrix();
+            osg::Vec3d obj_pos = obj_matrix.getTrans();
+
+            cout << "obj: " << obj_pos.x() - obj_matrixes[i]->getSize() << endl;
+            cout << "frg: " << frog_pos.x() << endl;
+
+
+            if ((frog_pos.y() == obj_pos.y()) && (frog_pos.x() >= obj_pos.x() - obj_matrixes[i]->getSize()) && (frog_pos.x() <= (obj_pos.x() + obj_matrixes[i]->getSize()))) {
+                //if (frog_pos.x() < -10.0 + obj_matrixes[i]->getSize() - deltaTime * obj_matrixes[i]->getDirection() * 5) {
+                //    frog_pos.x() = -10.0 + obj_matrixes[i]->getSize() - deltaTime * obj_matrixes[i]->getDirection() * 5;
+                //    cout << "FROGG: (" << frog_pos.x() << endl; //", " << frog_pos.y() << ", " << frog_pos.z() << ")" << endl;
+                //}
+                //else if (frog_pos.x() > 10.0 - obj_matrixes[i]->getSize() + deltaTime * obj_matrixes[i]->getDirection() * 5) {
+                //    //frog_pos.x() = 10.0;
+                //    frog_pos.x() = 10.0 - obj_matrixes[i]->getSize() + deltaTime * obj_matrixes[i]->getDirection() * 5;
+                //}
+                //else {
+                //    frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5; //obj_matrixes[i]->getDirection() * 0.1;
+                //}
+
+                if ((obj_pos.x() - obj_matrixes[i]->getSize() < -10.0) || (obj_pos.x() + obj_matrixes[i]->getSize() > 10.0)) {
+                }
+                frog_pos.x() += deltaTime * obj_matrixes[i]->getDirection() * 5;
+
+                frogOnObj = true;
+                //cout << "zmieniam na obiekcie" << endl;
+
+                _model->setMatrix(
+                    osg::Matrixd::scale(_model->getMatrix().getScale()) *
+                    osg::Matrixd::rotate(osg::DegreesToRadians(-90.0), osg::Vec3(1, 0, 0)) *
+                    osg::Matrixd::rotate(osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1)) *
+                    osg::Matrixd::translate(frog_pos)
+                );
+                break;
+            }
+            
+            //frogOnObj = false;
+
+            //cout << "OBJ: (" << obj_pos.x() << ", " << obj_pos.y() << ", " << obj_pos.z() << ")" << endl;
+        }
+
+        /*if (!frogOnObj && frog_pos.y() != 0.0 && frog_pos.y() != 10.0) {
+            cout << "PRZEGRANA" << endl;
+            canPlay = false;
+        }*/
+    }
     return false;
 }
 
@@ -176,46 +197,50 @@ bool ObjController::handle(const osgGA::GUIEventAdapter& ea,
     osg::Matrix matrix = _obj->getMatrix()->getMatrix();
     osg::Vec3 position = matrix.getTrans();
 
+    if (!win and canPlay){
+        position.x() += deltaTime * _obj->getDirection() * 5; //_obj->getDirection() * 0.1; 
 
-    if (type == "leaf") {
-        if (position.x() < -10.0) {
-            position.x() = -10.0;
-            _obj->setDirection(1);
-        }
-        else if (position.x() > 10.0) {
-            position.x() = 10.0;
-            _obj->setDirection(-1); //k = -1;
-        }
-    }
-    else {
-        if (position.x() < -9.0) {
-            position.x() = -9.0;
-            _obj->setDirection(1); //k = 1;
-        }
-        else if (position.x() > 9.0) {
-            position.x() = 9.0;
-            _obj->setDirection(-1); //k = -1;
-        }
-    }
-     
-    position.x() +=  deltaTime * _obj->getDirection() * 5; //_obj->getDirection() * 0.1; 
+        //if (type == "leaf") {
+            if (position.x() <= -10.0 + _obj->getSize()) {
+                position.x() = -10.0 + _obj->getSize();
+                cout << "odbijam na x=" << position.x() << endl;
+                _obj->setDirection(1);
+            }
+            else if (position.x() >= 10.0 - _obj->getSize()) {
+                position.x() = 10.0-_obj->getSize();
+                cout << "odbijam na x=" << position.x() << endl;
+                _obj->setDirection(-1); //k = -1;
+            }
+        //}
+        //else {
+        //    if (position.x() < -9.0) {
+        //        position.x() = -9.0;
+        //        _obj->setDirection(1); //k = 1;
+        //    }
+        //    else if (position.x() > 9.0) {
+        //        position.x() = 9.0;
+        //        _obj->setDirection(-1); //k = -1;
+        //    }
+        //}
 
-    if (type == "leaf") {
-        _obj->getMatrix()->setMatrix(
-            osg::Matrixd::scale(_obj->getMatrix()->getMatrix().getScale()) *
-            osg::Matrixd::rotate(_obj->getMatrix()->getMatrix().getRotate()) *
-            osg::Matrixd::translate(position)
-        );
+        //position.x() += deltaTime * _obj->getDirection() * 5; //_obj->getDirection() * 0.1; 
+
+        if (type == "leaf") {
+            _obj->getMatrix()->setMatrix(
+                osg::Matrixd::scale(_obj->getMatrix()->getMatrix().getScale()) *
+                osg::Matrixd::rotate(_obj->getMatrix()->getMatrix().getRotate()) *
+                osg::Matrixd::translate(position)
+            );
+        }
+        else if (type == "planks") {
+            _obj->getMatrix()->setMatrix(
+                osg::Matrix::scale(0.015, 0.015, 0.04) *
+                osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 0, 1)) *
+                osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) *
+                osg::Matrixd::translate(position)
+            );
+        }
     }
-    else if (type == "planks") {
-        _obj->getMatrix()->setMatrix(
-            osg::Matrix::scale(0.015, 0.015, 0.04) *
-            osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 0, 1)) *
-            osg::Matrix::rotate(osg::DegreesToRadians(90.0), osg::Vec3(0, 1, 0)) *
-            osg::Matrixd::translate(position)
-        );
-    }
-    
     //cout << "pos: (" << position.x() << ", " << position.y() << ", " << position.z() << ")" << endl;
    
     return false;
@@ -494,11 +519,11 @@ osg::Node* stworz_scene(osgViewer::Viewer* viewer)
         scn->addChild(r10);
 
 
-        RiverObject* leaf_obj = new RiverObject(l, 1, 0.5);
-        RiverObject* leaf2_obj = new RiverObject(l2, -1, 0.5);
-        RiverObject* plank_obj = new RiverObject(p, 1, 2);
-        RiverObject* plank2_obj = new RiverObject(p2, -1, 2);
-        RiverObject* leaf3_obj = new RiverObject(l3, 1, 0.5);
+        RiverObject* leaf_obj = new RiverObject(l, 1, 0.8);
+        RiverObject* leaf2_obj = new RiverObject(l2, -1, 0.8);
+        RiverObject* plank_obj = new RiverObject(p, 1, 2.1);
+        RiverObject* plank2_obj = new RiverObject(p2, -1, 2.1);
+        RiverObject* leaf3_obj = new RiverObject(l3, 1, 0.8);
 
 
         osg::ref_ptr<ObjController> controller_l = new ObjController(leaf_obj, "leaf"); //new ObjController(l, 1, "leaf");
