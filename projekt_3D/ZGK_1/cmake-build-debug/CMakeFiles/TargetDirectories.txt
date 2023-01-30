@@ -1,0 +1,4 @@
+C:/Users/xxx/Desktop/ZGK_1/ZGK_1/cmake-build-debug/CMakeFiles/ZGK_1.dir
+C:/Users/xxx/Desktop/ZGK_1/ZGK_1/cmake-build-debug/CMakeFiles/copy_assets.dir
+C:/Users/xxx/Desktop/ZGK_1/ZGK_1/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/xxx/Desktop/ZGK_1/ZGK_1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
