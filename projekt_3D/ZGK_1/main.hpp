@@ -1,0 +1,16 @@
+#pragma once
+#include <cstdio>
+#include <cstdlib>
+#include <osg/Geometry>
+#include <osg/Geode>
+#include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+#include <osgViewer/Viewer>
+#include <osg/Texture2D>
+#include <osg/AnimationPath>
+#include <osgGA/GUIEventHandler>
+#include <osg/LightSource>
+#include <array>
+#include <vector>
